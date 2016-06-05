@@ -28,7 +28,7 @@ template do
             :Default => 'mytestsite.com'
 
   parameter 'DBRootPassword',
-            :Description => 'What password to use for root user?',
+            :Description => 'What password to use for DB root user?',
             :Type => 'String',
             :MinLength => '10',
             :MaxLength => '20',
@@ -36,12 +36,26 @@ template do
             :Default => '3wZqvWddoT3D339uFEQW'
 
   parameter 'DBCMSPassword',
-            :Description => 'What password to use for cms user?',
+            :Description => 'What password to use for DB cms user?',
             :Type => 'String',
             :MinLength => '10',
             :MaxLength => '20',
             :AllowedPattern => '[a-zA-Z0-9]*',
             :Default => 'Zrx46g7fyicdUf9Nh4mj'
+
+  parameter 'CMSAdminPassword',
+            :Description => 'What password to use for cms admin user?',
+            :Type => 'String',
+            :MinLength => '10',
+            :MaxLength => '20',
+            :AllowedPattern => '[a-zA-Z0-9]*',
+            :Default => '4NrLdvm26ANo7mt2shWr'
+
+  parameter 'CMSAdminEmail',
+            :Description => 'What email address to use for the cms admin user?',
+            :Type => 'String',
+            :AllowedPattern => '[a-zA-Z0-9]*',
+            :Default => 'andyboutte@mac.com'
 
   #TODO: figure out how to preload the parameters
   load_from_file('../../lib/autoloader.rb')
@@ -279,6 +293,7 @@ template do
           { :IpProtocol => 'tcp', :FromPort => '22', :ToPort => '22', :CidrIp => ref('SSHLocation'), },
       ],
       :SecurityGroupEgress => [
+          { :IpProtocol => 'tcp', :FromPort => '25', :ToPort => '25', :CidrIp => '0.0.0.0/0' },
           { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
           { :IpProtocol => 'tcp', :FromPort => '443', :ToPort => '443', :CidrIp => '0.0.0.0/0' },
       ],

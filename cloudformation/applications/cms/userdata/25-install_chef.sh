@@ -7,7 +7,7 @@ rpm -ivh https://packages.chef.io/stable/el/6/chefdk-0.14.25-1.el6.x86_64.rpm
 #curl -LO https://omnitruck.chef.io/install.sh && sudo bash ./install.sh -v $CHEF_VERSION && rm -f install.sh
 
 # Pull down the application cookbook from GitHub
-HOME=/root/
+export HOME=/root/
 mkdir -p /etc/chef/
 cd /tmp/
 git clone https://github.com/andyboutte/cms-deployment.git
@@ -39,6 +39,10 @@ cat <<EOF > /etc/chef/json_attributes.json
     "mysql": {
       "root_user_password": "{{ref('DBRootPassword')}}",
       "cms_user_password": "{{ref('DBCMSPassword')}}"
+    },
+    "cms": {
+      "admin_user_password": "{{ref('CMSAdminPassword')}}",
+      "admin_user_email": "{{ref('CMSAdminEmail')}}"
     }
   }
 }
