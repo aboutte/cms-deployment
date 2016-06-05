@@ -26,27 +26,21 @@ json_attribs    "/etc/chef/json_attributes.json"
 EOF
 
 # Create the json attributes file to define the run list and cloudformation parameters
-cat <<EOF > /etc/chef/json_attributes.json
+cat <<EOF > /etc/chef/json_attributes_cloudformation.json
 {
   "run_list": [
     "wordpress-rean"
   ],
   "cloud": {
-    "hostname": "{{ref('Hostname')}}",
-    "wordpress": {
-      "key": "value"
-    },
-    "mysql": {
-      "root_user_password": "{{ref('DBRootPassword')}}",
-      "cms_user_password": "{{ref('DBCMSPassword')}}"
-    },
-    "cms": {
-      "admin_user_password": "{{ref('CMSAdminPassword')}}",
-      "admin_user_email": "{{ref('CMSAdminEmail')}}"
-    }
+    "application": "{{ref('Application')}}"
   }
 }
 EOF
+
+aws --region {{aws_region}} s3 cp s3://rean-us-west-2-aboutte/#{parameters['Application']}/#{parameters['Environment']}/json_attributes_sensitive.json /etc/chef/json_attributes_sensitive.json
+
+# Merge the json_attributes files into one file for Chef to read in
+jq -s '.[0] * .[1]' /etc/chef/json_attributes_cloudformation.json /etc/chef/json_attributes_sensitive.json > /etc/chef/json_attributes.json
 
 # Pull down all the dependency cookbooks
 cd /etc/chef/cookbooks/wordpress-rean
