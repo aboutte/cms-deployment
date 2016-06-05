@@ -25,7 +25,7 @@ template do
   parameter 'Hostname',
             :Description => 'What Hostname should be used?',
             :Type => 'String',
-            :Default => 'mytestsite.com'
+            :Default => 'wordpress.andyboutte.com'
 
   parameter 'DBRootPassword',
             :Description => 'What password to use for DB root user?',
@@ -265,8 +265,6 @@ template do
       :AllocationId => get_att('NATIPAddress', 'AllocationId'),
       :SubnetId => ref('PublicSubnet')
   }
-
-
 
   resource 'FrontendFleet', :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
       :AvailabilityZones => [ get_att('PublicSubnet', 'AvailabilityZone') ],
