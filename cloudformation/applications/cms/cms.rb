@@ -56,7 +56,7 @@ template do
             :ConstraintDescription => 'can contain only alphanumeric characters, spaces, dashes and underscores.'
 
   parameter 'SSHLocation',
-            :Description => 'Lockdown SSH access to the bastion host (default can be accessed from anywhere)',
+            :Description => 'Lockdown SSH access',
             :Type => 'String',
             :MinLength => '9',
             :MaxLength => '18',
@@ -76,19 +76,15 @@ template do
             :Type => 'Number',
             :Default => '1'
 
-  parameter 'BastionInstanceType',
-            :Description => 'Bastion Host EC2 instance type',
-            :Type => 'String',
-            :Default => 't2.small',
-            :AllowedValues => %w(t1.micro t2.small m1.small m1.medium m1.large m1.xlarge m2.xlarge m2.2xlarge m2.4xlarge m3.xlarge m3.2xlarge c1.medium c1.xlarge cc2.8xlarge),
-            :ConstraintDescription => 'must be a valid EC2 instance type.'
-
   tag :application, :Value => parameters['Application']
   tag :environment, :Value => parameters['Environment']
   tag :launched_by, :Value => ENV['USER']
 
   resource 'VPC', :Type => 'AWS::EC2::VPC', :Properties => {
       :CidrBlock => get_cidr('vpc'),
+      :Tags => [
+          { :Key => 'Name', :Value => parameters['Environment'] },
+      ],
   }
 
   resource 'PublicSubnet', :Type => 'AWS::EC2::Subnet', :Properties => {
@@ -257,67 +253,18 @@ template do
       :SubnetId => ref('PublicSubnet')
   }
 
-  resource 'BastionIPAddress', :Type => 'AWS::EC2::EIP', :Properties => {
-      :Domain => 'vpc',
-      :InstanceId => ref('BastionHost'),
-  }
-
-  resource 'BastionHost', :Type => 'AWS::EC2::Instance', :Properties => {
-      :InstanceType => ref('BastionInstanceType'),
-      :KeyName => ref('KeyName'),
-      :SubnetId => ref('PublicSubnet'),
-      :ImageId => amazon_linux_ami_id,
-      :SecurityGroupIds => [ ref('BastionSecurityGroup') ],
-      :Tags => [
-          { :Key => 'Name', :Value => 'BastionHost' }
-      ],
-  }
-
-  resource 'BastionSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => 'Enable access to the Bastion host',
-      :VpcId => ref('VPC'),
-      :SecurityGroupIngress => [
-          { :IpProtocol => 'tcp', :FromPort => '22', :ToPort => '22', :CidrIp => ref('SSHLocation'), },
-      ],
-      :SecurityGroupEgress => [
-          { :IpProtocol => 'tcp', :FromPort => '22', :ToPort => '22', :CidrIp => get_cidr('private'), },
-          { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
-          { :IpProtocol => 'tcp', :FromPort => '443', :ToPort => '443',  :CidrIp => '0.0.0.0/0' }
-      ],
-  }
-
-  resource 'PublicElasticLoadBalancer', :Type => 'AWS::ElasticLoadBalancing::LoadBalancer', :Properties => {
-      :SecurityGroups => [ ref('PublicLoadBalancerSecurityGroup') ],
-      :Subnets => [ ref('PublicSubnet') ],
-      :Listeners => [
-          { :LoadBalancerPort => '80', :InstancePort => '80', :Protocol => 'HTTP' },
-      ],
-      :HealthCheck => { :Target => 'HTTP:80/', :HealthyThreshold => '3', :UnhealthyThreshold => '5', :Interval => '90', :Timeout => '60' },
-  }
-
-  resource 'PublicLoadBalancerSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => 'Public ELB Security Group with HTTP access on port 80 from the internet',
-      :VpcId => ref('VPC'),
-      :SecurityGroupIngress => [
-          { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
-      ],
-      :SecurityGroupEgress => [
-          { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
-      ],
-  }
-
   resource 'FrontendFleet', :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
-      :AvailabilityZones => [ get_att('PrivateSubnet', 'AvailabilityZone') ],
-      :VPCZoneIdentifier => [ ref('PrivateSubnet') ],
+      :AvailabilityZones => [ get_att('PublicSubnet', 'AvailabilityZone') ],
+      :VPCZoneIdentifier => [ ref('PublicSubnet') ],
       :LaunchConfigurationName => ref('FrontendServerLaunchConfig'),
       :MinSize => '1',
-      :MaxSize => '3',
-      :DesiredCapacity => ref('FrontendSize'),
-      :LoadBalancerNames => [ ref('PublicElasticLoadBalancer') ],
+      :MaxSize => '1',
+      :DesiredCapacity => ref('FrontendSize')
   }
 
   resource 'FrontendServerLaunchConfig', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
       :ImageId => amazon_linux_ami_id,
+      :AssociatePublicIpAddress => true,
       :SecurityGroups => [ ref('FrontendSecurityGroup') ],
       :InstanceType => ref('FrontendInstanceType'),
       :KeyName => ref('KeyName'),
@@ -325,21 +272,11 @@ template do
   }
 
   resource 'FrontendSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => 'Allow access from load balancer and bastion as well as outbound HTTP and HTTPS traffic',
+      :GroupDescription => 'EC2 security group',
       :VpcId => ref('VPC'),
       :SecurityGroupIngress => [
-          {
-              :IpProtocol => 'tcp',
-              :FromPort => '80',
-              :ToPort => '80',
-              :SourceSecurityGroupId => ref('PublicLoadBalancerSecurityGroup'),
-          },
-          {
-              :IpProtocol => 'tcp',
-              :FromPort => '22',
-              :ToPort => '22',
-              :SourceSecurityGroupId => ref('BastionSecurityGroup'),
-          },
+          { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0', },
+          { :IpProtocol => 'tcp', :FromPort => '22', :ToPort => '22', :CidrIp => ref('SSHLocation'), },
       ],
       :SecurityGroupEgress => [
           { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
@@ -355,28 +292,9 @@ template do
       :Count => ref('FrontendSize'),
   }
 
-  resource 'PrivateLoadBalancerSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => 'Private ELB Security Group with HTTP access on port 80 from the Frontend Fleet only',
-      :VpcId => ref('VPC'),
-      :SecurityGroupIngress => [
-          {
-              :IpProtocol => 'tcp',
-              :FromPort => '80',
-              :ToPort => '80',
-              :SourceSecurityGroupId => ref('FrontendSecurityGroup'),
-          },
-      ],
-      :SecurityGroupEgress => [
-          { :IpProtocol => 'tcp', :FromPort => '80', :ToPort => '80', :CidrIp => '0.0.0.0/0' },
-      ],
-  }
-
   output 'WebSite',
          :Description => 'URL of the website',
-         :Value => join('', 'http://', get_att('PublicElasticLoadBalancer', 'DNSName'))
+         :Value => ref('Hostname')
 
-  output 'Bastion',
-         :Description => 'IP Address of the Bastion host',
-         :Value => ref('BastionIPAddress')
 
 end.exec!

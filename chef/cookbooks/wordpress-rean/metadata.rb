@@ -8,3 +8,4 @@ version          '0.1.0'
 
 depends 'wordpress'
 depends 'chef_hostname'
+depends 'users'
