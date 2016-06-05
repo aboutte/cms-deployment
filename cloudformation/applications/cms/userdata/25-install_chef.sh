@@ -7,10 +7,11 @@ rpm -ivh https://packages.chef.io/stable/el/6/chefdk-0.14.25-1.el6.x86_64.rpm
 #curl -LO https://omnitruck.chef.io/install.sh && sudo bash ./install.sh -v $CHEF_VERSION && rm -f install.sh
 
 # Pull down the application cookbook from GitHub
+HOME=/root/
 mkdir -p /etc/chef/
 cd /tmp/
 git clone https://github.com/andyboutte/cms-deployment.git
-mv cms-deployment/* /etc/chef/
+mv cms-deployment/chef/* /etc/chef/
 
 cat <<EOF > /etc/chef/client.rb
 log_level       :warn
@@ -18,7 +19,7 @@ log_location    "/var/log/chef-client.log"
 node_name       "$INSTANCE_ID"
 chef_repo_path  "/etc/chef/"
 cookbook_path   "/etc/chef/cookbooks/"
-data_bag_path   "/etc/chef/data_bags/"
+data_bag_path   "/etc/chef/databags/"
 environment     "{{ref('Environment')}}"
 local_mode      true
 json_attribs    "/etc/chef/json_attributes.json"
