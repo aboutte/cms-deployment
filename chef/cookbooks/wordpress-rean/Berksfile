@@ -1,0 +1,9 @@
+source "https://supermarket.chef.io"
+
+metadata
+
+cookbook 'wordpress', '~> 3.0.0'
+cookbook 'user', '~> 0.4.2'
+cookbook 'users', '~> 2.0.3'
+cookbook 'mysql', '~> 7.1.1'
+cookbook 'chef_hostname', '~> 0.4.1'

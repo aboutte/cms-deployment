@@ -1,0 +1,23 @@
+Notes for my sample projects:
+
+https://github.com/bazaarvoice/cloudformation-ruby-dsl
+
+Converting a .json CloudFormation template:
+
+- bundle install
+- bundle exec cfntemplate-to-ruby [EXISTING_CFN] > [NEW_NAME.rb]
+- chmod +x NEW_NAME.rb
+
+Usage:
+
+$ ./cms.rb
+usage: ./cms.rb <expand|diff|validate|create|update|cancel-update|delete|describe|describe-resource|get-template>
+
+Launching the CloudFormation stack:
+
+- bundle exec ./cms.rb create --region us-west-2 --stack-name test-$(date '+%s') --disable-rollback --parameters "Environment=production"
+
+Expand Ruby CloudFormation template into json:
+
+- bundle exec ./cms.rb expand --parameters "Environment=production"
+
