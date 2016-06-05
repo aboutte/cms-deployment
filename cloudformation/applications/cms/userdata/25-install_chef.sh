@@ -32,6 +32,7 @@ cat <<EOF > /etc/chef/json_attributes.json
     "wordpress-rean"
   ],
   "cloud": {
+    "application": "{{ref('Application')}}",
     "hostname": "{{ref('Hostname')}}",
     "mysql": {
       "root_user_password": "{{ref('DBRootPassword')}}",

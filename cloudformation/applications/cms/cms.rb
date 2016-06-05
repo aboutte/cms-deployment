@@ -278,7 +278,7 @@ template do
 
   resource 'FrontendServerLaunchConfig', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
       :ImageId => amazon_linux_ami_id,
-      :IamInstanceProfile => ref('IAMInstanceProfile'),
+      # :IamInstanceProfile => ref('IAMInstanceProfile'),
       :AssociatePublicIpAddress => true,
       :SecurityGroups => [ ref('FrontendSecurityGroup') ],
       :InstanceType => ref('FrontendInstanceType'),
