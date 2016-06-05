@@ -16,11 +16,45 @@ template do
             :ConstraintDescription => 'must be a valid environment.'
 
   parameter 'Application',
-            :Description => 'What CMS application to deploy',
+            :Description => 'What application to deploy',
             :Type => 'String',
             :AllowedValues => %w(wordpress drupal),
             :Default => 'wordpress',
             :ConstraintDescription => 'Must be a valid CMS.'
+
+  parameter 'Hostname',
+            :Description => 'What Hostname should be used?',
+            :Type => 'String',
+            :Default => 'wordpress.andyboutte.com'
+
+  parameter 'DBRootPassword',
+            :Description => 'What password to use for DB root user?',
+            :Type => 'String',
+            :MinLength => '10',
+            :MaxLength => '20',
+            :AllowedPattern => '[a-zA-Z0-9]*',
+            :Default => '3wZqvWddoT3D339uFEQW'
+
+  parameter 'DBCMSPassword',
+            :Description => 'What password to use for DB cms user?',
+            :Type => 'String',
+            :MinLength => '10',
+            :MaxLength => '20',
+            :AllowedPattern => '[a-zA-Z0-9]*',
+            :Default => 'Zrx46g7fyicdUf9Nh4mj'
+
+  parameter 'CMSAdminPassword',
+            :Description => 'What password to use for cms admin user?',
+            :Type => 'String',
+            :MinLength => '10',
+            :MaxLength => '20',
+            :AllowedPattern => '[a-zA-Z0-9]*',
+            :Default => '4NrLdvm26ANo7mt2shWr'
+
+  parameter 'CMSAdminEmail',
+            :Description => 'What email address to use for the cms admin user?',
+            :Type => 'String',
+            :Default => 'andyboutte@mac.com'
 
   # This has to go after the Application parameter because the assemble_usersdata.rb uses it
   # This has to go before SSHLocation parameter because the public_ip method is loaded up in autoloader.rb
@@ -273,10 +307,5 @@ template do
       :Timeout => '300',
       :Count => ref('FrontendSize'),
   }
-
-  output 'WebSite',
-         :Description => 'URL of the website',
-         :Value => ref('Hostname')
-
 
 end.exec!
