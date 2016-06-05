@@ -54,7 +54,6 @@ template do
   parameter 'CMSAdminEmail',
             :Description => 'What email address to use for the cms admin user?',
             :Type => 'String',
-            :AllowedPattern => '[a-zA-Z0-9]*',
             :Default => 'andyboutte@mac.com'
 
   #TODO: figure out how to preload the parameters
@@ -267,6 +266,8 @@ template do
       :SubnetId => ref('PublicSubnet')
   }
 
+
+
   resource 'FrontendFleet', :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
       :AvailabilityZones => [ get_att('PublicSubnet', 'AvailabilityZone') ],
       :VPCZoneIdentifier => [ ref('PublicSubnet') ],
@@ -278,6 +279,7 @@ template do
 
   resource 'FrontendServerLaunchConfig', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
       :ImageId => amazon_linux_ami_id,
+      :IamInstanceProfile => ref('IAMInstanceProfile'),
       :AssociatePublicIpAddress => true,
       :SecurityGroups => [ ref('FrontendSecurityGroup') ],
       :InstanceType => ref('FrontendInstanceType'),

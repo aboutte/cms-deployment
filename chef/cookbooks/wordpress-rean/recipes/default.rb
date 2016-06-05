@@ -8,5 +8,5 @@
 #
 
 include_recipe 'wordpress-rean::users'
-include_recipe 'wordpress-rean::wp-cli'
+include_recipe 'wp-cli'
 include_recipe 'wordpress-rean::wordpress'

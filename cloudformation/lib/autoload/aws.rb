@@ -97,20 +97,3 @@ def get_cidr(subnet)
       end
   end
 end
-
-
-#TODO: should I automate getting the keypair
-def get keypairname
-
-  resp = client.describe_key_pairs({
-                                       dry_run: false,
-                                       key_names: ["String"],
-                                       filters: [
-                                           {
-                                               name: "String",
-                                               values: ["String"],
-                                           },
-                                       ],
-                                   })
-
-end
