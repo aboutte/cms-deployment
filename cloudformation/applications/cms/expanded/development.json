@@ -25,7 +25,36 @@
     "Hostname": {
       "Description": "What Hostname should be used?",
       "Type": "String",
-      "Default": "mytestsite.com"
+      "Default": "wordpress.andyboutte.com"
+    },
+    "DBRootPassword": {
+      "Description": "What password to use for DB root user?",
+      "Type": "String",
+      "MinLength": "10",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "Default": "3wZqvWddoT3D339uFEQW"
+    },
+    "DBCMSPassword": {
+      "Description": "What password to use for DB cms user?",
+      "Type": "String",
+      "MinLength": "10",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "Default": "Zrx46g7fyicdUf9Nh4mj"
+    },
+    "CMSAdminPassword": {
+      "Description": "What password to use for cms admin user?",
+      "Type": "String",
+      "MinLength": "10",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "Default": "4NrLdvm26ANo7mt2shWr"
+    },
+    "CMSAdminEmail": {
+      "Description": "What email address to use for the cms admin user?",
+      "Type": "String",
+      "Default": "andyboutte@mac.com"
     },
     "KeyName": {
       "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -37,16 +66,16 @@
       "ConstraintDescription": "can contain only alphanumeric characters, spaces, dashes and underscores."
     },
     "SSHLocation": {
-      "Description": "Lockdown SSH access to the bastion host (default can be accessed from anywhere)",
+      "Description": "Lockdown SSH access",
       "Type": "String",
       "MinLength": "9",
       "MaxLength": "18",
-      "Default": "138.229.191.46/32",
+      "Default": "72.29.184.194/32",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "must be a valid CIDR range of the form x.x.x.x/x."
     },
     "FrontendInstanceType": {
-      "Description": "Frontend (varnish) Server EC2 instance type",
+      "Description": "Frontend Server EC2 instance type",
       "Type": "String",
       "Default": "t2.small",
       "AllowedValues": [
@@ -71,35 +100,19 @@
       "Description": "Number of EC2 instances to launch for the Frontend server",
       "Type": "Number",
       "Default": "1"
-    },
-    "BastionInstanceType": {
-      "Description": "Bastion Host EC2 instance type",
-      "Type": "String",
-      "Default": "t2.small",
-      "AllowedValues": [
-        "t1.micro",
-        "t2.small",
-        "m1.small",
-        "m1.medium",
-        "m1.large",
-        "m1.xlarge",
-        "m2.xlarge",
-        "m2.2xlarge",
-        "m2.4xlarge",
-        "m3.xlarge",
-        "m3.2xlarge",
-        "c1.medium",
-        "c1.xlarge",
-        "cc2.8xlarge"
-      ],
-      "ConstraintDescription": "must be a valid EC2 instance type."
     }
   },
   "Resources": {
     "VPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
-        "CidrBlock": "10.0.0.0/16"
+        "CidrBlock": "10.0.0.0/16",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "development"
+          }
+        ]
       }
     },
     "PublicSubnet": {
@@ -420,169 +433,37 @@
         }
       }
     },
-    "BastionIPAddress": {
-      "Type": "AWS::EC2::EIP",
-      "Properties": {
-        "Domain": "vpc",
-        "InstanceId": {
-          "Ref": "BastionHost"
-        }
-      }
-    },
-    "BastionHost": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "InstanceType": {
-          "Ref": "BastionInstanceType"
-        },
-        "KeyName": {
-          "Ref": "KeyName"
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet"
-        },
-        "ImageId": "ami-d0f506b0",
-        "SecurityGroupIds": [
-          {
-            "Ref": "BastionSecurityGroup"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "BastionHost"
-          }
-        ]
-      }
-    },
-    "BastionSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enable access to the Bastion host",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22",
-            "CidrIp": {
-              "Ref": "SSHLocation"
-            }
-          }
-        ],
-        "SecurityGroupEgress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22",
-            "CidrIp": "10.0.1.0/24"
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": "0.0.0.0/0"
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "443",
-            "ToPort": "443",
-            "CidrIp": "0.0.0.0/0"
-          }
-        ]
-      }
-    },
-    "PublicElasticLoadBalancer": {
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties": {
-        "SecurityGroups": [
-          {
-            "Ref": "PublicLoadBalancerSecurityGroup"
-          }
-        ],
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet"
-          }
-        ],
-        "Listeners": [
-          {
-            "LoadBalancerPort": "80",
-            "InstancePort": "80",
-            "Protocol": "HTTP"
-          }
-        ],
-        "HealthCheck": {
-          "Target": "HTTP:80/",
-          "HealthyThreshold": "3",
-          "UnhealthyThreshold": "5",
-          "Interval": "90",
-          "Timeout": "60"
-        }
-      }
-    },
-    "PublicLoadBalancerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Public ELB Security Group with HTTP access on port 80 from the internet",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": "0.0.0.0/0"
-          }
-        ],
-        "SecurityGroupEgress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": "0.0.0.0/0"
-          }
-        ]
-      }
-    },
     "FrontendFleet": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": [
           {
             "Fn::GetAtt": [
-              "PrivateSubnet",
+              "PublicSubnet",
               "AvailabilityZone"
             ]
           }
         ],
         "VPCZoneIdentifier": [
           {
-            "Ref": "PrivateSubnet"
+            "Ref": "PublicSubnet"
           }
         ],
         "LaunchConfigurationName": {
           "Ref": "FrontendServerLaunchConfig"
         },
         "MinSize": "1",
-        "MaxSize": "3",
+        "MaxSize": "1",
         "DesiredCapacity": {
           "Ref": "FrontendSize"
-        },
-        "LoadBalancerNames": [
-          {
-            "Ref": "PublicElasticLoadBalancer"
-          }
-        ]
+        }
       }
     },
     "FrontendServerLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "ImageId": "ami-d0f506b0",
+        "AssociatePublicIpAddress": true,
         "SecurityGroups": [
           {
             "Ref": "FrontendSecurityGroup"
@@ -602,32 +483,25 @@
                 "#!/bin/bash\n",
                 "\n",
                 "\n",
-                "# START 100-end.sh\n",
-                "\n",
-                "/opt/aws/bin/cfn-signal -e $? '",
-                {
-                  "Ref": "FrontendWaitHandle"
-                },
-                "'\n",
-                "# END 100-end.sh\n",
-                "\n",
-                "\n",
-                "\n",
                 "# START 15-update_os.sh\n",
                 "\n",
                 "yum update -y\n",
+                "\n",
                 "# Install dependencies for berkshelf gem\n",
                 "yum -y install gcc ruby-devel rubygems\n",
-                "# END 15-update_os.sh\n",
                 "\n",
+                "# Install general dependencies that can not be managed by chef\n",
+                "yum -y install git jq\n",
+                "\n",
+                "# END 15-update_os.sh\n",
                 "\n",
                 "\n",
                 "# START 20-environment_variables.sh\n",
                 "\n",
                 "\n",
                 "export INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)\n",
-                "# END 20-environment_variables.sh\n",
                 "\n",
+                "# END 20-environment_variables.sh\n",
                 "\n",
                 "\n",
                 "# START 25-install_chef.sh\n",
@@ -639,10 +513,12 @@
                 "#export CHEF_VERSION=\"12.10.24\"\n",
                 "#curl -LO https://omnitruck.chef.io/install.sh && sudo bash ./install.sh -v $CHEF_VERSION && rm -f install.sh\n",
                 "\n",
-                "mkdir -p /etc/chef/cookbooks/\n",
-                "mkdir -p /etc/chef/data_bags/\n",
-                "mkdir -p /etc/chef/environments/\n",
-                "\n",
+                "# Pull down the application cookbook from GitHub\n",
+                "export HOME=/root/\n",
+                "mkdir -p /etc/chef/\n",
+                "cd /tmp/\n",
+                "git clone https://github.com/andyboutte/cms-deployment.git\n",
+                "mv cms-deployment/chef/* /etc/chef/\n",
                 "\n",
                 "cat <<EOF > /etc/chef/client.rb\n",
                 "log_level       :warn\n",
@@ -650,7 +526,7 @@
                 "node_name       \"$INSTANCE_ID\"\n",
                 "chef_repo_path  \"/etc/chef/\"\n",
                 "cookbook_path   \"/etc/chef/cookbooks/\"\n",
-                "data_bag_path   \"/etc/chef/data_bags/\"\n",
+                "data_bag_path   \"/etc/chef/databags/\"\n",
                 "environment     \"",
                 {
                   "Ref": "Environment"
@@ -661,44 +537,69 @@
                 "EOF\n",
                 "\n",
                 "# Create the json attributes file to define the run list and cloudformation parameters\n",
-                "\n",
                 "cat <<EOF > /etc/chef/json_attributes.json\n",
                 "{\n",
                 "  \"run_list\": [\n",
-                "    \"wordpress-rean\"\n",
+                "    \"cms-rean\"\n",
                 "  ],\n",
                 "  \"cloud\": {\n",
+                "    \"application\": \"",
+                {
+                  "Ref": "Application"
+                },
+                "\",\n",
                 "    \"hostname\": \"",
                 {
                   "Ref": "Hostname"
                 },
                 "\",\n",
-                "    \"wordpress\": {\n",
-                "      \"key\": \"value\"\n",
-                "    },\n",
                 "    \"mysql\": {\n",
-                "      \"root_user_password\": \"value\",\n",
-                "      \"wordpress_user_password\": \"value\"\n",
+                "      \"root_user_password\": \"",
+                {
+                  "Ref": "DBRootPassword"
+                },
+                "\",\n",
+                "      \"cms_user_password\": \"",
+                {
+                  "Ref": "DBCMSPassword"
+                },
+                "\"\n",
+                "    },\n",
+                "    \"cms\": {\n",
+                "      \"admin_user_password\": \"",
+                {
+                  "Ref": "CMSAdminPassword"
+                },
+                "\",\n",
+                "      \"admin_user_email\": \"",
+                {
+                  "Ref": "CMSAdminEmail"
+                },
+                "\"\n",
                 "    }\n",
                 "  }\n",
                 "}\n",
                 "EOF\n",
                 "\n",
-                "# Pull down the application cookbook from GitHub\n",
-                "\n",
-                "\n",
-                "\n",
                 "# Pull down all the dependency cookbooks\n",
-                "cd /etc/chef/cookbooks/wordpress-rean\n",
+                "cd /etc/chef/cookbooks/cms-rean\n",
                 "/usr/bin/berks vendor /etc/chef/cookbooks/\n",
                 "\n",
-                "# Create an alias for rerunning chef-client\n",
-                "\n",
-                "# run chef\n",
-                "\n",
+                "# Run chef\n",
                 "chef-client\n",
+                "\n",
                 "# END 25-install_chef.sh\n",
                 "\n",
+                "\n",
+                "# START 99-end.sh\n",
+                "\n",
+                "/opt/aws/bin/cfn-signal -e $? '",
+                {
+                  "Ref": "FrontendWaitHandle"
+                },
+                "'\n",
+                "\n",
+                "# END 99-end.sh\n",
                 "\n"
               ]
             ]
@@ -709,7 +610,7 @@
     "FrontendSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "Allow access from load balancer and bastion as well as outbound HTTP and HTTPS traffic",
+        "GroupDescription": "EC2 security group",
         "VpcId": {
           "Ref": "VPC"
         },
@@ -718,20 +619,24 @@
             "IpProtocol": "tcp",
             "FromPort": "80",
             "ToPort": "80",
-            "SourceSecurityGroupId": {
-              "Ref": "PublicLoadBalancerSecurityGroup"
-            }
+            "CidrIp": "0.0.0.0/0"
           },
           {
             "IpProtocol": "tcp",
             "FromPort": "22",
             "ToPort": "22",
-            "SourceSecurityGroupId": {
-              "Ref": "BastionSecurityGroup"
+            "CidrIp": {
+              "Ref": "SSHLocation"
             }
           }
         ],
         "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "25",
+            "ToPort": "25",
+            "CidrIp": "0.0.0.0/0"
+          },
           {
             "IpProtocol": "tcp",
             "FromPort": "80",
@@ -761,58 +666,6 @@
         "Count": {
           "Ref": "FrontendSize"
         }
-      }
-    },
-    "PrivateLoadBalancerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Private ELB Security Group with HTTP access on port 80 from the Frontend Fleet only",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "SourceSecurityGroupId": {
-              "Ref": "FrontendSecurityGroup"
-            }
-          }
-        ],
-        "SecurityGroupEgress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": "0.0.0.0/0"
-          }
-        ]
-      }
-    }
-  },
-  "Outputs": {
-    "WebSite": {
-      "Description": "URL of the website",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
-              "Fn::GetAtt": [
-                "PublicElasticLoadBalancer",
-                "DNSName"
-              ]
-            }
-          ]
-        ]
-      }
-    },
-    "Bastion": {
-      "Description": "IP Address of the Bastion host",
-      "Value": {
-        "Ref": "BastionIPAddress"
       }
     }
   }

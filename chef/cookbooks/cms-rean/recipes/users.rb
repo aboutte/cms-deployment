@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: wordpress-rean
+# Cookbook Name:: cms-rean
 # Recipe:: users
 #
 # Copyright (C) 2016 Andy Boutte

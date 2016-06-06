@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: wordpress-rean
+# Cookbook Name:: cms-rean
 # Recipe:: default
 #
 # Copyright (C) 2016 Andy Boutte
@@ -9,9 +9,9 @@
 
 if node['cloud']['application'] == 'wordpress'
 
-  include_recipe 'wordpress-rean::users'
+  include_recipe 'cms-rean::users'
   include_recipe 'wp-cli'
-  include_recipe 'wordpress-rean::wordpress'
+  include_recipe 'cms-rean::wordpress'
 
 elsif node['cloud']['application'] == 'drupal'
 

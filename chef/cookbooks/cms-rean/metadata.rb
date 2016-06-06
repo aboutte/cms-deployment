@@ -1,4 +1,4 @@
-name             'wordpress-rean'
+name             'cms-rean'
 maintainer       'Andy Boutte'
 maintainer_email 'andyboutte@mac.com'
 license          'All rights reserved'

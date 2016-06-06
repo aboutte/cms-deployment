@@ -29,7 +29,7 @@ EOF
 cat <<EOF > /etc/chef/json_attributes.json
 {
   "run_list": [
-    "wordpress-rean"
+    "cms-rean"
   ],
   "cloud": {
     "application": "{{ref('Application')}}",
@@ -47,7 +47,7 @@ cat <<EOF > /etc/chef/json_attributes.json
 EOF
 
 # Pull down all the dependency cookbooks
-cd /etc/chef/cookbooks/wordpress-rean
+cd /etc/chef/cookbooks/cms-rean
 /usr/bin/berks vendor /etc/chef/cookbooks/
 
 # Run chef

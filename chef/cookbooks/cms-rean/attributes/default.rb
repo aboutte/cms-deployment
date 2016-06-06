@@ -13,4 +13,4 @@ normal['wordpress']['server_name'] = node['cloud']['hostname']
 normal['wordpress']['server_aliases'] = ["www.#{node['cloud']['hostname']}"]
 
 
-default['wordpress-rean']['yum_packages'] = ['lynx', 'htop', 'sysstat']
+default['cms-rean']['yum_packages'] = ['lynx', 'htop', 'sysstat']

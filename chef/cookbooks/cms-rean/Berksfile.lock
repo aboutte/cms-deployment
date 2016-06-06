@@ -1,11 +1,13 @@
 DEPENDENCIES
-  mysql (~> 7.1.1)
-  user (~> 0.4.2)
-  users (~> 2.0.3)
-  wordpress (~> 3.0.0)
-  wordpress-rean
+  chef_hostname (~> 0.4.1)
+  cms-rean
     path: .
     metadata: true
+  mysql (~> 7.1.1)
+  sudo (~> 2.9.0)
+  users (~> 2.0.3)
+  wordpress (~> 3.0.0)
+  wp-cli (~> 0.1.4)
 
 GRAPH
   7-zip (1.0.2)
@@ -18,6 +20,14 @@ GRAPH
     7-zip (>= 0.0.0)
   chef-sugar (3.3.0)
   chef_handler (1.4.0)
+  chef_hostname (0.4.1)
+    compat_resource (>= 0.0.0)
+  cms-rean (0.1.0)
+    chef_hostname (>= 0.0.0)
+    sudo (>= 0.0.0)
+    users (>= 0.0.0)
+    wordpress (>= 0.0.0)
+    wp-cli (>= 0.0.0)
   compat_resource (12.10.5)
   database (5.1.2)
     postgresql (>= 1.0.0)
@@ -67,8 +77,8 @@ GRAPH
   selinux (0.9.0)
   smf (2.2.8)
     rbac (>= 1.0.1)
+  sudo (2.9.0)
   tar (0.7.0)
-  user (0.4.2)
   users (2.0.3)
   windows (1.43.0)
     chef_handler (>= 0.0.0)
@@ -85,8 +95,7 @@ GRAPH
     php-fpm (~> 0.6.10)
     selinux (~> 0.7)
     tar (>= 0.3.1)
-  wordpress-rean (0.1.0)
-    wordpress (>= 0.0.0)
+  wp-cli (0.1.4)
   xml (2.0.0)
     build-essential (>= 0.0.0)
     chef-sugar (>= 0.0.0)

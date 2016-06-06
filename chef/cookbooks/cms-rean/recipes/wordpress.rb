@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: wordpress-rean
+# Cookbook Name:: cms-rean
 # Recipe:: wordpress
 #
 # Copyright (C) 2016 Andy Boutte
@@ -10,7 +10,7 @@
 # Update /etc/hosts so that httpd does not complain
 hostname node['cloud']['hostname']
 
-node['wordpress-rean']['yum_packages'].each do |yum_package|
+node['cms-rean']['yum_packages'].each do |yum_package|
   package yum_package do
     action :install
   end
