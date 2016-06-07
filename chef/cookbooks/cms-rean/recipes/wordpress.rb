@@ -7,15 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# Update /etc/hosts so that httpd does not complain
-hostname node['cloud']['hostname']
-
-node['cms-rean']['yum_packages'].each do |yum_package|
-  package yum_package do
-    action :install
-  end
-end
-
 include_recipe 'wordpress'
 
 # Now that php, httpd, and wordpress are installed use the wp cli to finish the initial configuration of WordPress

@@ -7,6 +7,15 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# Update /etc/hosts so that httpd does not complain
+hostname node['cloud']['hostname']
+
+node['cms-rean']['yum_packages'].each do |yum_package|
+  package yum_package do
+    action :install
+  end
+end
+
 if node['cloud']['application'] == 'wordpress'
 
   include_recipe 'cms-rean::users'

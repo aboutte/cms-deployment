@@ -1,5 +1,3 @@
-TODO:
-
 # cms-deployment
 
 ## Summary
@@ -8,8 +6,8 @@ This repository contains the tools to create a WordPress deployment in an AWS en
 
 Tools used:
 
-- [cloudformation-ruby-dsl](https://github.com/bazaarvoice/cloudformation-ruby-dsl) - Used to manage the creation of CloudFormation Tempaltes
-- [berkshelf](http://berkshelf.com/)] - berkshelf is used to manage the chef cookbook dependencies
+- [cloudformation-ruby-dsl](https://github.com/bazaarvoice/cloudformation-ruby-dsl) - Used to manage the creation of CloudFormation templates
+- [berkshelf](http://berkshelf.com/) - berkshelf is used to manage the chef cookbook dependencies
 - [chef-client](https://docs.chef.io/chef_client.html) - chef-client (in local_mode) is used to converge the EC2 instance into the expected state (running httpd, PHP, MySQL, WordPress)
 
 
@@ -35,29 +33,30 @@ export AWS_SECRET_ACCESS_KEY="xxxxxxxx"
 ### Install
 
 ```
-# Clone repo from GitHuh
+# Clone repo from GitHub
 git clone https://github.com/andyboutte/cms-deployment.git
 cd cms-deployment
 gem install bundler
 bundle install
+cd applications/cms/
 ```
 
 ### Usage
 
-Usage:
+##### Usage:
 
 ```
 $ ./cms.rb
 usage: ./cms.rb <expand|diff|validate|create|update|cancel-update|delete|describe|describe-resource|get-template>
 ```
 
-Launching CloudFormation stack:
+##### Launching CloudFormation stack:
 
 ```
-bundle exec ./cms.rb create --region us-west-2 --stack-name test-$(date '+%s') --disable-rollback --parameters "Application=wordpress;Environment=production"
+bundle exec ./cms.rb create --region us-west-2 --stack-name wordpress-production-$(date '+%s') --disable-rollback --parameters "Application=wordpress;Environment=production"
 ```
 
-Expand Ruby CloudFormation template into json:
+##### Expand Ruby CloudFormation template into json:
 
 ```
 bundle exec ./cms.rb expand --parameters "Application=wordpress;Environment=production"
