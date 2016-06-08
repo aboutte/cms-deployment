@@ -32,13 +32,12 @@ def amazon_linux_ami_id
 
   # The results of describe_images is an array of all Amazon Linux AMIs
   # To find the latest sort by the object attribute creation_date
-  amazon_linux_amis.images.sort_by! {|obj| obj.creation_date}
+  amazon_linux_amis.images.sort_by!(&:creation_date)
   amazon_linux_amis.images.last.image_id
 end
 
 # Passing in a subnet (public or private) will return the subnet cidr based on region and environment
 def get_cidr(subnet)
-
   case aws_region
   when 'us-west-2'
     case parameters['Environment']

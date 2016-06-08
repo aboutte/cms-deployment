@@ -14,7 +14,7 @@ git clone https://github.com/andyboutte/cms-deployment.git
 mv cms-deployment/chef/* /etc/chef/
 
 cat <<EOF > /etc/chef/client.rb
-log_level       :warn
+log_level       :info
 log_location    "/var/log/chef-client.log"
 node_name       "$INSTANCE_ID"
 chef_repo_path  "/etc/chef/"
