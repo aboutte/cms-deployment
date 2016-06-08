@@ -16,6 +16,77 @@ Tools used:
 The expanded CloudFormation templates can be found in the [expanded](https://github.com/andyboutte/cms-deployment/tree/master/cloudformation/applications/cms/expanded) directory.
 These expanded templates are the output of the cloudformation-ruby-dsl and are ready for use.
 
+## Parameters
+
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>Environment/td>
+    <td>string</td>
+    <td>What environment to deploy the CMS in</td>
+    <td>development</td>
+  </tr>
+  <tr>
+    <td>Application/td>
+    <td>string</td>
+    <td>Which CMS to deploy</td>
+    <td>wordpress</td>
+  </tr>
+  <tr>
+    <td>Hostname/td>
+    <td>string</td>
+    <td>What hostname to use for the CMS</td>
+    <td>wordpress</td>
+  </tr>
+  <tr>
+    <td>DBRootPassword/td>
+    <td>string</td>
+    <td>Password to use for root DB user</td>
+    <td>redacted</td>
+  </tr>
+  <tr>
+    <td>DBCMSPassword/td>
+    <td>string</td>
+    <td>Password to use when creating initial DB user for the CMS</td>
+    <td>redacted</td>
+  </tr>
+  <tr>
+    <td>CMSAdminPassword/td>
+    <td>string</td>
+    <td>Password to use when creating initial user in the CMS</td>
+    <td>redacted</td>
+  </tr>
+  <tr>
+    <td>CMSAdminEmail/td>
+    <td>string</td>
+    <td>Email address to use when creating initial user in the CMS</td>
+    <td>redacted</td>
+  </tr>
+  <tr>
+    <td>KeyName/td>
+    <td>string</td>
+    <td>SSH key name to use</td>
+    <td>redacted</td>
+  </tr>
+  <tr>
+    <td>SSHLocation/td>
+    <td>string</td>
+    <td>Public IP of workstation location used at launch time</td>
+    <td>NA</td>
+  </tr>
+  <tr>
+    <td>FrontendInstanceType/td>
+    <td>string</td>
+    <td>EC2 instance size to use</td>
+    <td>t2.small</td>
+  </tr>
+</table>
+
 ## Installing from GitHub
 
 If development work is needed in the CloudFormation area go through this section.

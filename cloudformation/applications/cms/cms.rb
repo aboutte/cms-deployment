@@ -29,6 +29,7 @@ template do
   parameter 'DBRootPassword',
             Description: 'What password to use for DB root user?',
             Type: 'String',
+            NoEcho: true,
             MinLength: '10',
             MaxLength: '20',
             AllowedPattern: '[a-zA-Z0-9]*',
@@ -37,6 +38,7 @@ template do
   parameter 'DBCMSPassword',
             Description: 'What password to use for DB cms user?',
             Type: 'String',
+            NoEcho: true,
             MinLength: '10',
             MaxLength: '20',
             AllowedPattern: '[a-zA-Z0-9]*',
@@ -45,6 +47,7 @@ template do
   parameter 'CMSAdminPassword',
             Description: 'What password to use for cms admin user?',
             Type: 'String',
+            NoEcho: true,
             MinLength: '10',
             MaxLength: '20',
             AllowedPattern: '[a-zA-Z0-9]*',
@@ -53,6 +56,7 @@ template do
   parameter 'CMSAdminEmail',
             Description: 'What email address to use for the cms admin user?',
             Type: 'String',
+            NoEcho: true,
             Default: 'andyboutte@mac.com'
 
   # This has to go after the Application parameter because the assemble_usersdata.rb uses it
@@ -83,11 +87,6 @@ template do
             Default: 't2.small',
             AllowedValues: %w(t1.micro t2.small m1.small m1.medium m1.large m1.xlarge m2.xlarge m2.2xlarge m2.4xlarge m3.xlarge m3.2xlarge c1.medium c1.xlarge cc2.8xlarge),
             ConstraintDescription: 'must be a valid EC2 instance type.'
-
-  parameter 'FrontendSize',
-            Description: 'Number of EC2 instances to launch for the Frontend server',
-            Type: 'Number',
-            Default: '1'
 
   tag :application, Value: parameters['Application']
   tag :environment, Value: parameters['Environment']
@@ -320,6 +319,6 @@ template do
   resource 'FrontendWaitCondition', Type: 'AWS::CloudFormation::WaitCondition', DependsOn: 'FrontendFleet', Properties: {
     Handle: ref('FrontendWaitHandle'),
     Timeout: '300',
-    Count: ref('FrontendSize')
+    Count: 1
   }
 end.exec!
