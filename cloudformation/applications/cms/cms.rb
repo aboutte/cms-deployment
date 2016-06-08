@@ -24,7 +24,7 @@ template do
   parameter 'Hostname',
             Description: 'What Hostname should be used?',
             Type: 'String',
-            Default: 'wordpress.andyboutte.com'
+            Default: 'dev.wordpress.andyboutte.com'
 
   parameter 'DBRootPassword',
             Description: 'What password to use for DB root user?',

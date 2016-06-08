@@ -41,7 +41,7 @@ These expanded templates are the output of the cloudformation-ruby-dsl and are r
     <td>Hostname</td>
     <td>string</td>
     <td>What hostname to use for the CMS</td>
-    <td>wordpress</td>
+    <td>dev.wordpress.andyboutte.com</td>
   </tr>
   <tr>
     <td>DBRootPassword</td>
