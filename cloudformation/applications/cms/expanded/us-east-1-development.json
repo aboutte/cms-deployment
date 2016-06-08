@@ -25,11 +25,12 @@
     "Hostname": {
       "Description": "What Hostname should be used?",
       "Type": "String",
-      "Default": "wordpress.andyboutte.com"
+      "Default": "dev.wordpress.andyboutte.com"
     },
     "DBRootPassword": {
       "Description": "What password to use for DB root user?",
       "Type": "String",
+      "NoEcho": true,
       "MinLength": "10",
       "MaxLength": "20",
       "AllowedPattern": "[a-zA-Z0-9]*",
@@ -38,6 +39,7 @@
     "DBCMSPassword": {
       "Description": "What password to use for DB cms user?",
       "Type": "String",
+      "NoEcho": true,
       "MinLength": "10",
       "MaxLength": "20",
       "AllowedPattern": "[a-zA-Z0-9]*",
@@ -46,6 +48,7 @@
     "CMSAdminPassword": {
       "Description": "What password to use for cms admin user?",
       "Type": "String",
+      "NoEcho": true,
       "MinLength": "10",
       "MaxLength": "20",
       "AllowedPattern": "[a-zA-Z0-9]*",
@@ -54,6 +57,7 @@
     "CMSAdminEmail": {
       "Description": "What email address to use for the cms admin user?",
       "Type": "String",
+      "NoEcho": true,
       "Default": "andyboutte@mac.com"
     },
     "KeyName": {
@@ -95,22 +99,17 @@
         "cc2.8xlarge"
       ],
       "ConstraintDescription": "must be a valid EC2 instance type."
-    },
-    "FrontendSize": {
-      "Description": "Number of EC2 instances to launch for the Frontend server",
-      "Type": "Number",
-      "Default": "1"
     }
   },
   "Resources": {
     "VPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
-        "CidrBlock": "10.1.0.0/16",
+        "CidrBlock": "10.2.0.0/16",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "production"
+            "Value": "development"
           }
         ]
       }
@@ -121,7 +120,7 @@
         "VpcId": {
           "Ref": "VPC"
         },
-        "CidrBlock": "10.1.0.0/24",
+        "CidrBlock": "10.2.0.0/24",
         "Tags": [
           {
             "Key": "Name",
@@ -308,7 +307,7 @@
         "VpcId": {
           "Ref": "VPC"
         },
-        "CidrBlock": "10.1.1.0/24",
+        "CidrBlock": "10.2.1.0/24",
         "Tags": [
           {
             "Key": "Name",
@@ -434,47 +433,31 @@
       }
     },
     "FrontendFleet": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Type": "AWS::EC2::Instance",
+      "DependsOn": "GatewayToInternet",
       "Properties": {
-        "AvailabilityZones": [
-          {
-            "Fn::GetAtt": [
-              "PublicSubnet",
-              "AvailabilityZone"
-            ]
-          }
-        ],
-        "VPCZoneIdentifier": [
-          {
-            "Ref": "PublicSubnet"
-          }
-        ],
-        "LaunchConfigurationName": {
-          "Ref": "FrontendServerLaunchConfig"
-        },
-        "MinSize": "1",
-        "MaxSize": "1",
-        "DesiredCapacity": {
-          "Ref": "FrontendSize"
-        }
-      }
-    },
-    "FrontendServerLaunchConfig": {
-      "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "Properties": {
-        "ImageId": "ami-d0f506b0",
-        "AssociatePublicIpAddress": true,
-        "SecurityGroups": [
-          {
-            "Ref": "FrontendSecurityGroup"
-          }
-        ],
+        "ImageId": "ami-f5f41398",
         "InstanceType": {
           "Ref": "FrontendInstanceType"
         },
         "KeyName": {
           "Ref": "KeyName"
         },
+        "NetworkInterfaces": [
+          {
+            "GroupSet": [
+              {
+                "Ref": "FrontendSecurityGroup"
+              }
+            ],
+            "AssociatePublicIpAddress": true,
+            "DeviceIndex": "0",
+            "DeleteOnTermination": true,
+            "SubnetId": {
+              "Ref": "PublicSubnet"
+            }
+          }
+        ],
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -518,7 +501,7 @@
                 "mv cms-deployment/chef/* /etc/chef/\n",
                 "\n",
                 "cat <<EOF > /etc/chef/client.rb\n",
-                "log_level       :warn\n",
+                "log_level       :info\n",
                 "log_location    \"/var/log/chef-client.log\"\n",
                 "node_name       \"$INSTANCE_ID\"\n",
                 "chef_repo_path  \"/etc/chef/\"\n",
@@ -660,9 +643,7 @@
           "Ref": "FrontendWaitHandle"
         },
         "Timeout": "300",
-        "Count": {
-          "Ref": "FrontendSize"
-        }
+        "Count": 1
       }
     }
   }

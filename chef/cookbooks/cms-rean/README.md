@@ -1,7 +1,7 @@
 # cms-rean-cookbook
 
-The cms-rean cookbook was created to facilitate the configuration of a CMS deployment.  cms-rean has several
-[dependencies](https://github.com/andyboutte/cms-deployment/blob/master/chef/cookbooks/cms-rean/Berksfile)that it relies on to do the heavy lifting.
+The cms-rean cookbook was created to facilitate the configuration of a CMS deployment.  Currently the installation of WordPress is supported.
+cms-rean has several [dependencies](https://github.com/andyboutte/cms-deployment/blob/master/chef/cookbooks/cms-rean/Berksfile) that it relies on to do the heavy lifting.
 
 ## Supported Platforms
 

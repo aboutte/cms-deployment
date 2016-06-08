@@ -124,12 +124,15 @@ usage: ./cms.rb <expand|diff|validate|create|update|cancel-update|delete|describ
 ##### Launching CloudFormation stack:
 
 ```
-bundle exec ./cms.rb create --region us-west-2 --stack-name wordpress-production-$(date '+%s') --disable-rollback --parameters "Application=wordpress;Environment=production"
+bundle exec ./cms.rb create --region us-west-2 --stack-name wordpress-production-$(date '+%s') --disable-rollback --parameters "Application=wordpress;Environment=production;Hostname=wordpress.andyboutte.com"
 ```
 
 ##### Expand Ruby CloudFormation template into json:
 
 ```
-bundle exec ./cms.rb expand --parameters "Application=wordpress;Environment=production"
+bundle exec ./cms.rb expand --region us-west-2 --parameters "Application=wordpress;Environment=production;Hostname=wordpress.andyboutte.com" > expanded/us-west-2-production.json
+bundle exec ./cms.rb expand --region us-east-1 --parameters "Application=wordpress;Environment=production;Hostname=wordpress.andyboutte.com" > expanded/us-east-1-production.json
+bundle exec ./cms.rb expand --region us-west-2 --parameters "Application=wordpress;Environment=development;Hostname=dev.wordpress.andyboutte.com" > expanded/us-west-2-development.json
+bundle exec ./cms.rb expand --region us-east-1 --parameters "Application=wordpress;Environment=development;Hostname=dev.wordpress.andyboutte.com" > expanded/us-east-1-development.json
 ```
 
